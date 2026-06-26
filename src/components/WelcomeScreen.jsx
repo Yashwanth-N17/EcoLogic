@@ -27,19 +27,21 @@ export default function WelcomeScreen({ onStart }) {
 
   return (
     <div className="onboarding-backdrop welcome-screen-bg">
-      {/* Animated Floating Background Shapes */}
-      <div className="floating-bubble bubble-1"></div>
-      <div className="floating-bubble bubble-2"></div>
-      <div className="floating-bubble bubble-3"></div>
-      <div className="floating-bubble bubble-4"></div>
+      <div className="welcome-bg-container">
+        {/* Animated Floating Background Shapes */}
+        <div className="floating-bubble bubble-1"></div>
+        <div className="floating-bubble bubble-2"></div>
+        <div className="floating-bubble bubble-3"></div>
+        <div className="floating-bubble bubble-4"></div>
 
-      {/* Rising Sparkle Particles */}
-      <div className="sparkle-particle sparkle-1"></div>
-      <div className="sparkle-particle sparkle-2"></div>
-      <div className="sparkle-particle sparkle-3"></div>
-      <div className="sparkle-particle sparkle-4"></div>
-      <div className="sparkle-particle sparkle-5"></div>
-      <div className="sparkle-particle sparkle-6"></div>
+        {/* Rising Sparkle Particles */}
+        <div className="sparkle-particle sparkle-1"></div>
+        <div className="sparkle-particle sparkle-2"></div>
+        <div className="sparkle-particle sparkle-3"></div>
+        <div className="sparkle-particle sparkle-4"></div>
+        <div className="sparkle-particle sparkle-5"></div>
+        <div className="sparkle-particle sparkle-6"></div>
+      </div>
 
       <div className="welcome-screen-card">
         <div className="welcome-screen-header">

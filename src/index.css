@@ -278,10 +278,21 @@ button, input, select, textarea {
 
 /* Moving Light Blue & White Animated Background */
 .onboarding-backdrop.welcome-screen-bg {
+  background: transparent;
+  overflow-y: auto;
+  overflow-x: hidden;
+  display: block;
+}
+
+.welcome-bg-container {
+  position: fixed;
+  inset: 0;
   background: linear-gradient(-45deg, #ffffff, #f0f9ff, #e0f2fe, #ffffff);
   background-size: 400% 400%;
   animation: gradientBgMove 8s ease infinite;
   overflow: hidden;
+  z-index: 1;
+  pointer-events: none;
 }
 
 @keyframes gradientBgMove {
@@ -426,6 +437,8 @@ button, input, select, textarea {
 
 /* Premium Welcome Screen Styling */
 .welcome-screen-card {
+  position: relative;
+  z-index: 5;
   background-color: transparent;
   max-width: 100%;
   width: 100%;
@@ -441,7 +454,7 @@ button, input, select, textarea {
 .welcome-screen-header {
   background: transparent;
   color: var(--text-primary);
-  padding: 80px 24px 32px 24px;
+  padding: 48px 24px 16px 24px;
   text-align: center;
   display: flex;
   flex-direction: column;
@@ -499,7 +512,7 @@ button, input, select, textarea {
 }
 
 .welcome-screen-body {
-  padding: 40px 24px;
+  padding: 20px 24px 32px 24px;
   flex: 1;
   max-width: 900px;
   width: 100%;
@@ -512,7 +525,7 @@ button, input, select, textarea {
   line-height: 1.7;
   color: var(--text-secondary);
   text-align: center;
-  margin-bottom: 40px;
+  margin-bottom: 24px;
   max-width: 650px;
   margin-left: auto;
   margin-right: auto;
