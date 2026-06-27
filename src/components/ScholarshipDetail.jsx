@@ -15,6 +15,7 @@ export default function ScholarshipDetail({
 }) {
   const [activeTab, setActiveTab] = useState('eligibility');
   const [essayText, setEssayText] = useState(application?.essay || '');
+  const [showExtensionGuide, setShowExtensionGuide] = useState(false);
 
   const criteria = scholarship.eligibilityCriteria;
   
@@ -248,43 +249,31 @@ export default function ScholarshipDetail({
                   </div>
                   <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
                     <button 
-                      onClick={() => onOpenInAppBrowser(scholarship.id)}
+                      onClick={() => {
+                        window.open(scholarship.officialUrl || 'https://scholarships.gov.in', '_blank');
+                        setShowExtensionGuide(true);
+                        if (status === 'Not Started') {
+                          onStartApplication(scholarship.id);
+                        }
+                      }}
                       className="btn-primary"
                       style={{ 
-                        fontSize: '13px', 
-                        padding: '10px 14px', 
+                        fontSize: '13.5px', 
+                        padding: '11px 18px', 
                         whiteSpace: 'nowrap',
                         display: 'inline-flex',
                         alignItems: 'center',
-                        gap: '6px',
-                        borderRadius: '8px',
-                        fontWeight: '600',
+                        gap: '8px',
+                        borderRadius: '10px',
+                        fontWeight: '700',
                         border: 'none',
-                        cursor: 'pointer'
+                        cursor: 'pointer',
+                        background: 'linear-gradient(135deg, var(--primary), #6366f1)',
+                        boxShadow: '0 4px 12px rgba(14, 165, 233, 0.25)',
                       }}
                     >
-                      Apply via EcoVault (Autofill) ⚡
+                      🚀 Autofill via Chrome Extension
                     </button>
-                    <a
-                      href={scholarship.officialUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="btn-secondary"
-                      style={{
-                        fontSize: '13px',
-                        padding: '10px 14px',
-                        whiteSpace: 'nowrap',
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        gap: '4px',
-                        borderRadius: '8px',
-                        fontWeight: '600',
-                        textDecoration: 'none',
-                        textAlign: 'center'
-                      }}
-                    >
-                      Apply Manually ↗
-                    </a>
                   </div>
                 </div>
               )}
@@ -430,7 +419,94 @@ export default function ScholarshipDetail({
           )}
         </div>
 
+        </div>
+
       </div>
+
+      {showExtensionGuide && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          width: '100vw',
+          height: '100vh',
+          background: 'rgba(15, 23, 42, 0.75)',
+          backdropFilter: 'blur(8px)',
+          zIndex: 2000,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          fontFamily: "'Inter', sans-serif"
+        }}>
+          <div style={{
+            background: 'var(--bg-card)',
+            border: '1px solid var(--border-color)',
+            borderRadius: '20px',
+            padding: '2rem',
+            maxWidth: '480px',
+            width: '90%',
+            textAlign: 'center',
+            boxShadow: 'var(--shadow-lg)'
+          }}>
+            <div style={{
+              background: 'rgba(14, 165, 233, 0.1)',
+              color: 'var(--primary)',
+              width: '64px',
+              height: '64px',
+              borderRadius: '50%',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              margin: '0 auto 1.5rem',
+              fontSize: '2rem'
+            }}>
+              🔌
+            </div>
+            <h3 style={{ fontSize: '1.4rem', fontWeight: 800, color: 'var(--text-primary)', margin: '0 0 0.5rem 0' }}>
+              Portal Opened in New Tab!
+            </h3>
+            <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', lineHeight: '1.6', margin: '0 0 1.5rem 0' }}>
+              We have loaded the official application portal for <strong>{scholarship.title}</strong> in a new browser tab.
+            </p>
+
+            <div style={{
+              background: 'var(--bg-app)',
+              border: '1px solid var(--border-color)',
+              borderRadius: '12px',
+              padding: '1.25rem',
+              textAlign: 'left',
+              marginBottom: '1.5rem'
+            }}>
+              <h5 style={{ margin: '0 0 0.5rem 0', fontSize: '0.85rem', fontWeight: 700, color: 'var(--text-primary)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                How to Autofill:
+              </h5>
+              <ol style={{ margin: 0, paddingLeft: '1.2rem', fontSize: '0.83rem', color: 'var(--text-secondary)', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                <li>Switch to the newly opened tab.</li>
+                <li>Click the puzzle piece icon (Extensions) in the top-right toolbar of Chrome.</li>
+                <li>Select the <strong>EcoLogic ScholarMate Autofill</strong> extension.</li>
+                <li>Click <strong>⚡ Autofill This Portal Form</strong> to instantly populate all details!</li>
+              </ol>
+            </div>
+
+            <button 
+              onClick={() => setShowExtensionGuide(false)}
+              className="btn-primary"
+              style={{
+                width: '100%',
+                padding: '12px',
+                borderRadius: '10px',
+                border: 'none',
+                fontWeight: 700,
+                fontSize: '0.9rem',
+                cursor: 'pointer',
+                background: 'linear-gradient(135deg, var(--primary), #6366f1)'
+              }}
+            >
+              Got it, continue
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

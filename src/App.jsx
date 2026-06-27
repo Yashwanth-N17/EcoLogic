@@ -27,7 +27,6 @@ import ResourceCenter from './components/ResourceCenter';
 import MentorChat from './components/MentorChat';
 import WelcomeScreen from './components/WelcomeScreen';
 import DocumentVault from './components/DocumentVault';
-import InAppBrowser from './components/InAppBrowser';
 import EcoLabs from './components/EcoLabs';
 
 export default function App() {
@@ -65,7 +64,6 @@ export default function App() {
   const [activeTerm, setActiveTerm] = useState(null);
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [showWelcome, setShowWelcome] = useState(true);
-  const [activeScholarshipForBrowser, setActiveScholarshipForBrowser] = useState(null);
   
   const [language, setLanguage] = useState(() => {
     return localStorage.getItem('econav_language') || 'en';
@@ -494,24 +492,6 @@ export default function App() {
     return <Onboarding onComplete={handleOnboardingComplete} />;
   }
 
-  if (activeScholarshipForBrowser) {
-    const scholarship = SCHOLARSHIPS.find(s => s.id === activeScholarshipForBrowser);
-    return (
-      <InAppBrowser 
-        scholarship={scholarship}
-        profile={profile}
-        vaultDocs={vaultDocs}
-        setVaultDocs={setVaultDocs}
-        onClose={() => setActiveScholarshipForBrowser(null)}
-        onSubmitApplication={(id) => {
-          handleSubmitApplication(id);
-          setActiveScholarshipForBrowser(null);
-          setActiveTab('tracker');
-        }}
-      />
-    );
-  }
-
   const selectedScholarship = SCHOLARSHIPS.find(s => s.id === selectedScholarshipId);
 
   return (
@@ -823,7 +803,6 @@ export default function App() {
           onSubmitApplication={handleSubmitApplication}
           onClose={() => setSelectedScholarshipId(null)}
           onOpenGlossaryTerm={handleOpenJargonTerm}
-          onOpenInAppBrowser={setActiveScholarshipForBrowser}
         />
       )}
 

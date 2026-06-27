@@ -3094,3 +3094,211 @@ body.ecolite-mode .scholarship-card {
   50% { transform: scale(1.1); }
   100% { transform: scale(1); }
 }
+
+/* =========================================
+   Dashboard — Yashwanth Refactor Classes
+   ========================================= */
+.dashboard-header-clean {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  padding-bottom: 24px;
+  border-bottom: 1px solid var(--border-color);
+  margin-bottom: 28px;
+  flex-wrap: wrap;
+}
+.header-greeting h2 { font-size: 22px; font-weight: 800; color: var(--text-primary); margin-bottom: 4px; }
+.header-greeting p { font-size: 14px; color: var(--text-secondary); }
+.header-gauge-clean { display: flex; align-items: center; gap: 14px; flex-shrink: 0; }
+.gauge-circle-container { position: relative; width: 70px; height: 70px; }
+.matching-circle-svg-clean { width: 70px; height: 70px; transform: rotate(-90deg); }
+.matching-circle-bg-clean { fill: none; stroke: var(--border-color); stroke-width: 5; }
+.matching-circle-fill-clean { fill: none; stroke: var(--primary); stroke-width: 5; stroke-linecap: round; transition: stroke-dashoffset 0.8s ease; }
+.gauge-text-clean { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 800; color: var(--primary); }
+.gauge-info-clean strong { display: block; font-size: 14px; font-weight: 700; color: var(--text-primary); margin-bottom: 2px; }
+.gauge-info-clean p { font-size: 12px; color: var(--text-secondary); max-width: 160px; line-height: 1.5; }
+.metrics-bar-clean { display: flex; gap: 0; border: 1px solid var(--border-color); border-radius: var(--radius-lg); background: var(--bg-card); overflow: hidden; margin-bottom: 28px; }
+.metric-item-clean { flex: 1; padding: 14px 16px; border-right: 1px solid var(--border-color); display: flex; flex-direction: column; gap: 4px; }
+.metric-item-clean:last-child { border-right: none; }
+.metric-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted); }
+.metric-val { font-size: 18px; font-weight: 800; color: var(--text-primary); }
+.metric-val.warning { color: #b45309; }
+.metric-val.success { color: #065f46; }
+.metric-val.primary { color: var(--primary); }
+.deadline-highlight-clean { background: linear-gradient(135deg, #eff6ff, #f0fdf4); }
+.dashboard-grid-clean { display: grid; grid-template-columns: 1fr 340px; gap: 24px; align-items: start; }
+@media (max-width: 900px) { .dashboard-grid-clean { grid-template-columns: 1fr; } }
+.main-content-column, .sidebar-column-clean { display: flex; flex-direction: column; gap: 24px; }
+.clean-section { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: 20px; box-shadow: var(--shadow-sm); }
+.clean-section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+.clean-section-header h3 { font-size: 15px; font-weight: 700; color: var(--text-primary); display: flex; align-items: center; gap: 8px; }
+.btn-text { background: none; border: none; color: var(--primary); font-size: 13px; font-weight: 600; cursor: pointer; padding: 0; }
+.btn-text:hover { text-decoration: underline; }
+.recommendations-list-clean { display: flex; flex-direction: column; gap: 12px; }
+.scholarship-row-clean { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 14px; border-radius: var(--radius-md); border: 1px solid var(--border-color); background: var(--bg-app); cursor: pointer; transition: var(--transition); }
+.scholarship-row-clean:hover { border-color: var(--primary-light); background: #eff6ff; transform: translateX(2px); }
+.row-main-clean { flex: 1; min-width: 0; }
+.row-provider { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted); margin-bottom: 2px; }
+.row-main-clean h4 { font-size: 14px; font-weight: 700; color: var(--text-primary); margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.row-desc { font-size: 12px; color: var(--text-secondary); line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.row-meta-clean { display: flex; flex-direction: column; align-items: flex-end; gap: 6px; flex-shrink: 0; }
+.row-meta-stats { display: flex; flex-direction: column; align-items: flex-end; gap: 2px; }
+.amount-highlight { font-size: 13px; font-weight: 800; color: var(--primary); }
+.deadline-subtext { font-size: 11px; color: var(--text-muted); display: flex; align-items: center; gap: 4px; }
+.match-badge-clean { font-size: 11px; font-weight: 800; padding: 3px 8px; border-radius: 9999px; text-transform: uppercase; letter-spacing: 0.04em; }
+.match-badge-clean.high { background: #d1fae5; color: #065f46; }
+.match-badge-clean.medium { background: #fef3c7; color: #92400e; }
+.match-badge-clean.low { background: var(--border-color); color: var(--text-muted); }
+.mini-deadlines-clean { display: flex; flex-direction: column; gap: 10px; }
+.mini-deadline-row-clean { display: flex; align-items: center; justify-content: space-between; padding: 10px 12px; border-radius: var(--radius-md); border: 1px solid var(--border-color); background: var(--bg-app); cursor: pointer; transition: var(--transition); gap: 10px; }
+.mini-deadline-row-clean:hover { border-color: var(--primary-light); }
+.mini-row-info { flex: 1; min-width: 0; }
+.mini-row-info strong { display: block; font-size: 12px; font-weight: 700; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.mini-row-info span { font-size: 11px; color: var(--text-muted); }
+.urgency-dot-clean { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+.urgency-dot-clean.urgent { background: #ef4444; }
+.urgency-dot-clean.warning { background: #f59e0b; }
+.empty-state-clean { font-size: 13px; color: var(--text-muted); text-align: center; padding: 16px 0; }
+.guidance-cards-clean { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+@media (max-width: 700px) { .guidance-cards-clean { grid-template-columns: 1fr; } }
+.guidance-card-clean { padding: 16px; border: 1px solid var(--border-color); border-radius: var(--radius-md); background: var(--bg-app); }
+.guidance-card-clean .gc-icon { width: 34px; height: 34px; background: var(--primary-light); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: var(--primary); margin-bottom: 10px; }
+.guidance-card-clean h4 { font-size: 13px; font-weight: 700; color: var(--text-primary); margin-bottom: 4px; }
+.guidance-card-clean p { font-size: 12px; color: var(--text-secondary); line-height: 1.5; }
+
+/* =========================================
+   Scholarship Listing — Yashwanth Classes
+   ========================================= */
+.discovery-stats-clean { display: flex; gap: 20px; align-items: center; }
+.discovery-stat-item { display: flex; flex-direction: column; align-items: flex-end; gap: 1px; }
+.stat-lbl { font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--text-muted); letter-spacing: 0.04em; }
+.stat-val { font-size: 20px; font-weight: 800; color: var(--text-primary); }
+.stat-val.warning { color: #b45309; }
+.stat-val.primary { color: var(--primary); }
+
+.search-bar-clean { margin-bottom: 20px; }
+.search-input-wrapper-clean { position: relative; display: flex; align-items: center; }
+.search-icon { position: absolute; left: 14px; color: var(--text-muted); pointer-events: none; }
+.search-input-clean { width: 100%; padding: 11px 14px 11px 42px; border-radius: var(--radius-lg); border: 1px solid var(--border-color); background: var(--bg-card); color: var(--text-primary); font-size: 14px; outline: none; transition: var(--transition); box-sizing: border-box; }
+.search-input-clean:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(14,165,233,0.1); }
+
+.discovery-layout-clean { display: grid; grid-template-columns: 220px 1fr; gap: 20px; align-items: start; }
+@media (max-width: 800px) { .discovery-layout-clean { grid-template-columns: 1fr; } }
+
+.filters-sidebar-clean { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: 16px; position: sticky; top: 20px; }
+.sidebar-header-clean { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+.sidebar-header-clean h3 { font-size: 13px; font-weight: 700; color: var(--text-primary); }
+.filter-badge-count { font-size: 11px; background: var(--primary); color: white; padding: 2px 7px; border-radius: 9999px; font-weight: 700; }
+.filter-groups-stack { display: flex; flex-direction: column; gap: 14px; }
+.filter-group-clean h4 { font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--text-muted); letter-spacing: 0.05em; margin-bottom: 8px; }
+.filter-chips-list { display: flex; flex-wrap: wrap; gap: 6px; }
+.filter-chip-clean { padding: 4px 10px; border-radius: 9999px; border: 1px solid var(--border-color); background: var(--bg-app); color: var(--text-secondary); font-size: 12px; font-weight: 600; cursor: pointer; transition: var(--transition); }
+.filter-chip-clean:hover { border-color: var(--primary); color: var(--primary); }
+.filter-chip-clean.active { background: var(--primary); border-color: var(--primary); color: white; }
+.btn-reset-filters-clean { width: 100%; margin-top: 14px; padding: 8px; border-radius: var(--radius-md); border: 1px dashed var(--border-color); background: none; color: var(--text-muted); font-size: 12px; font-weight: 600; cursor: pointer; }
+.btn-reset-filters-clean:hover { border-color: #ef4444; color: #ef4444; }
+
+.listing-results-clean { min-width: 0; }
+.results-toolbar-clean { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 14px; flex-wrap: wrap; }
+.results-tabs-clean { display: flex; gap: 4px; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: 4px; }
+.tab-btn-clean { padding: 6px 12px; border-radius: 8px; border: none; background: none; color: var(--text-secondary); font-size: 12px; font-weight: 600; cursor: pointer; transition: var(--transition); }
+.tab-btn-clean:hover { color: var(--text-primary); }
+.tab-btn-clean.active { background: var(--primary); color: white; box-shadow: var(--shadow-sm); }
+.sort-wrapper-clean { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--text-secondary); font-weight: 600; }
+.select-clean { padding: 6px 10px; border-radius: var(--radius-md); border: 1px solid var(--border-color); background: var(--bg-card); color: var(--text-primary); font-size: 12px; font-weight: 600; cursor: pointer; outline: none; }
+
+.scholarship-rows-stack-clean { display: flex; flex-direction: column; gap: 10px; }
+.browser-row-clean { padding: 16px; }
+.row-top-clean { display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px; }
+.status-tag-clean { font-size: 10px; font-weight: 800; padding: 3px 8px; border-radius: 9999px; text-transform: uppercase; }
+.status-tag-clean.live { background: #d1fae5; color: #065f46; }
+.status-tag-clean.closing-soon { background: #fef3c7; color: #92400e; }
+.status-tag-clean.upcoming { background: #eff6ff; color: var(--primary-dark, #1e40af); }
+.card-tags-clean { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 8px; }
+.card-tag-clean { font-size: 10px; background: var(--border-color); color: var(--text-secondary); padding: 3px 8px; border-radius: 9999px; font-weight: 600; }
+.card-tag-clean.highlight { background: #eff6ff; color: var(--primary); }
+.row-side-clean { display: flex; flex-direction: column; align-items: flex-end; gap: 8px; flex-shrink: 0; min-width: 110px; }
+.row-metrics-clean { display: flex; flex-direction: column; align-items: flex-end; gap: 2px; }
+.row-actions-clean { display: flex; flex-direction: column; align-items: flex-end; gap: 6px; }
+.btn-save-toggle-clean { background: none; border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 6px 10px; font-size: 12px; font-weight: 600; cursor: pointer; color: var(--text-muted); transition: var(--transition); display: flex; align-items: center; gap: 4px; }
+.btn-save-toggle-clean:hover { border-color: #ec4899; color: #ec4899; }
+.btn-save-toggle-clean.saved { background: #fdf2f8; border-color: #ec4899; color: #ec4899; }
+.empty-results-clean { text-align: center; padding: 48px 24px; background: var(--bg-card); border: 1px dashed var(--border-color); border-radius: var(--radius-lg); }
+.empty-results-clean h3 { font-size: 16px; font-weight: 700; margin-bottom: 8px; color: var(--text-primary); }
+.empty-results-clean p { font-size: 13px; color: var(--text-secondary); }
+
+/* =========================================
+   Tracker — Kanban Board Classes
+   ========================================= */
+.kanban-board-clean { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; align-items: start; }
+@media (max-width: 900px) { .kanban-board-clean { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 550px) { .kanban-board-clean { grid-template-columns: 1fr; } }
+
+.kanban-column-clean { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-lg); overflow: hidden; }
+.kanban-column-header-clean { padding: 12px 14px; border-bottom: 1px solid var(--border-color); display: flex; align-items: center; justify-content: space-between; }
+.kanban-column-title-clean { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-secondary); display: flex; align-items: center; gap: 6px; }
+.kanban-column-title-clean.warning { color: #b45309; }
+.kanban-column-title-clean.success { color: #065f46; }
+.kanban-column-title-clean.error { color: #991b1b; }
+.kanban-column-count-clean { font-size: 12px; font-weight: 800; background: var(--border-color); color: var(--text-secondary); padding: 2px 8px; border-radius: 9999px; }
+.kanban-column-count-clean.warning { background: #fef3c7; color: #92400e; }
+.kanban-column-count-clean.success { background: #d1fae5; color: #065f46; }
+.kanban-column-count-clean.error { background: #fee2e2; color: #991b1b; }
+.kanban-cards-clean { padding: 10px; display: flex; flex-direction: column; gap: 8px; min-height: 80px; }
+.empty-column-clean { font-size: 12px; color: var(--text-muted); text-align: center; padding: 16px 8px; }
+
+.kanban-card-clean { background: var(--bg-app); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 12px; cursor: pointer; transition: var(--transition); }
+.kanban-card-clean:hover { border-color: var(--primary-light); box-shadow: var(--shadow-md); transform: translateY(-1px); }
+.card-topline-clean { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
+.card-provider-clean { font-size: 10px; font-weight: 700; text-transform: uppercase; color: var(--text-muted); letter-spacing: 0.04em; }
+.card-amount-clean { font-size: 11px; font-weight: 800; color: var(--primary); }
+.card-title-clean { font-size: 13px; font-weight: 700; color: var(--text-primary); line-height: 1.4; margin-bottom: 10px; }
+.card-progress-section-clean { margin-bottom: 8px; }
+.progress-text-row-clean { display: flex; justify-content: space-between; font-size: 11px; color: var(--text-muted); margin-bottom: 4px; }
+.progress-bar-container-clean { height: 6px; background: var(--border-color); border-radius: 9999px; overflow: hidden; }
+.progress-bar-fill-clean { height: 100%; background: linear-gradient(90deg, var(--primary), #6366f1); border-radius: 9999px; transition: width 0.4s ease; }
+.card-meta-clean { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+.card-deadline-clean { font-size: 11px; color: var(--text-muted); display: flex; align-items: center; gap: 4px; }
+.card-deadline-clean.urgent { color: #ef4444; font-weight: 700; }
+.card-actions-row-clean { display: flex; gap: 6px; flex-wrap: wrap; }
+.btn-action-clean { padding: 5px 10px; border-radius: var(--radius-md); border: none; font-size: 11px; font-weight: 700; cursor: pointer; transition: var(--transition); }
+.btn-action-clean.primary { background: var(--primary-light); color: var(--primary); }
+.btn-action-clean.primary:hover { background: var(--primary); color: white; }
+.btn-action-clean.danger { background: #fee2e2; color: #b91c1c; }
+.btn-action-clean.danger:hover { background: #b91c1c; color: white; }
+.btn-action-clean.success { background: #d1fae5; color: #065f46; }
+.btn-action-clean.success:hover { background: #065f46; color: white; }
+.btn-action-clean.disabled { opacity: 0.4; cursor: not-allowed; pointer-events: none; }
+
+/* =========================================
+   Resource Center — Yashwanth Classes
+   ========================================= */
+.resources-grid-clean { display: grid; grid-template-columns: 1fr 380px; gap: 20px; align-items: start; }
+@media (max-width: 800px) { .resources-grid-clean { grid-template-columns: 1fr; } }
+
+.jargon-dictionary-clean { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-lg); overflow: hidden; }
+.dictionary-header-clean { padding: 16px 20px; border-bottom: 1px solid var(--border-color); display: flex; align-items: center; justify-content: space-between; }
+.dictionary-header-clean h3 { font-size: 15px; font-weight: 700; color: var(--text-primary); display: flex; align-items: center; gap: 8px; }
+.glossary-terms-list-clean { padding: 8px; }
+.glossary-term-item-clean { border-radius: var(--radius-md); overflow: hidden; margin-bottom: 4px; }
+.glossary-term-name-clean { width: 100%; text-align: left; padding: 12px 14px; background: none; border: 1px solid transparent; border-radius: var(--radius-md); font-size: 14px; font-weight: 600; color: var(--text-primary); cursor: pointer; display: flex; align-items: center; justify-content: space-between; transition: var(--transition); }
+.glossary-term-name-clean:hover { background: var(--bg-app); border-color: var(--border-color); }
+.glossary-term-name-clean.active { background: var(--primary-light, #eff6ff); border-color: var(--primary); color: var(--primary); }
+.glossary-term-definition-clean { padding: 10px 14px 14px; font-size: 13px; color: var(--text-secondary); line-height: 1.6; background: var(--bg-app); border-left: 3px solid var(--primary); margin: 0 8px 4px; border-radius: 0 var(--radius-md) var(--radius-md) 0; }
+
+.templates-column-clean { display: flex; flex-direction: column; gap: 16px; }
+.section-desc-clean { font-size: 13px; color: var(--text-secondary); margin-bottom: 12px; line-height: 1.5; }
+.template-box-clean { background: var(--bg-app); border: 1px solid var(--border-color); border-radius: var(--radius-md); overflow: hidden; position: relative; }
+.template-pre-clean { padding: 14px; font-size: 12px; line-height: 1.6; color: var(--text-primary); white-space: pre-wrap; word-break: break-word; margin: 0; font-family: 'Inter', sans-serif; }
+.btn-copy-clean { position: absolute; top: 8px; right: 8px; padding: 4px 10px; background: var(--primary); color: white; border: none; border-radius: var(--radius-md); font-size: 11px; font-weight: 700; cursor: pointer; transition: var(--transition); }
+.btn-copy-clean:hover { background: var(--primary-dark, #1e40af); }
+
+.faq-list-clean { display: flex; flex-direction: column; gap: 6px; }
+.faq-item-clean { border: 1px solid var(--border-color); border-radius: var(--radius-md); overflow: hidden; }
+.faq-question-clean { width: 100%; text-align: left; padding: 12px 14px; background: none; border: none; font-size: 13px; font-weight: 600; color: var(--text-primary); cursor: pointer; display: flex; align-items: center; justify-content: space-between; transition: var(--transition); }
+.faq-question-clean:hover { background: var(--bg-app); }
+.faq-question-clean .arrow { font-size: 10px; color: var(--text-muted); }
+.faq-answer-clean { padding: 10px 14px 14px; font-size: 13px; color: var(--text-secondary); line-height: 1.6; background: var(--bg-app); border-top: 1px solid var(--border-color); }
+
+

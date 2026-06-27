@@ -48,6 +48,19 @@ const FILTER_SECTIONS = [
   }
 ];
 
+// Maps onboarding academicLevel IDs → scholarship eligibility strings
+const LEVEL_MAP = {
+  class11:  'Class 11',
+  class12:  'Class 12',
+  diploma:  'Diploma',
+  ug1:      'Undergrad',
+  ug2:      'Undergrad',
+  ug3:      'Undergrad',
+  ug4:      'Undergrad',
+  pg1:      'Postgraduate',
+  pg2:      'Postgraduate',
+};
+
 function getDaysLeft(deadline) {
   const now = new Date();
   const diffTime = new Date(deadline) - now;
@@ -118,9 +131,10 @@ export default function ScholarshipListing({
       score -= 20;
     }
 
-    // Academic Level check
+    // Academic Level check — map onboarding ID to readable label first
+    const mappedLevel = LEVEL_MAP[profile.academicLevel] || profile.academicLevel;
     const levelMatch = criteria.academicLevel.some((lvl) =>
-      profile.academicLevel.includes(lvl.split(' ')[0])
+      mappedLevel.toLowerCase().includes(lvl.toLowerCase().split(' ')[0])
     );
 
     if (criteria.academicLevel && !levelMatch) {

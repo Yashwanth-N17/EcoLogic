@@ -14,6 +14,11 @@ Here is the present list of all built and verified features:
     *   Uploads in the **Document Locker** trigger a high-fidelity **EcoOCR scanning modal** with laser sweeps and extraction text logs.
     *   Scanning the *Income Certificate* extracts **₹2,50,000** and updates the profile.
     *   Scanning the *Class 12 Marksheet* extracts **9.2 CGPA (92%)** and updates the profile.
+2b. **Real-World Chrome Extension Autofill:**
+    *   Developed a full Manifest V3 Chrome Extension located in `/extension`.
+    *   Injects a content script that dynamically scans form fields on government & corporate portals using keyword heuristics.
+    *   Extracts your active dashboard session ID (`econav_student_id`) directly from `localhost:5173` local storage and syncs data from `localhost:8080` API.
+    *   Populates real inputs (Name, Category, Income, State, GPA, Email, Phone) instantly on any portal form.
 3.  **In-App Notification Center & Meta WhatsApp Logs:**
     *   A dashboard bell notification showing outbox logs of Meta WhatsApp Business templates and text fallbacks sent on form submission.
 4.  **In-App Autofill Browser Simulator:**
@@ -36,6 +41,7 @@ We verified that the React + Vite project compiles perfectly:
 *   **Vite Frontend Server:** Live on **[http://localhost:5173/](http://localhost:5173/)**
 *   **FastAPI Backend Server:** Live on **[http://localhost:8080](http://localhost:8080)** (API Docs: **[http://localhost:8080/docs](http://localhost:8080/docs)**)
 *   **Build Integrity:** Compiled successfully in **361ms** with zero errors!
+*   **Chrome Extension:** Ready to load in `/extension` folder!
 
 ---
 
@@ -48,6 +54,11 @@ Here is a step-by-step workflow you can use to pitch the app to the jury:
     *   Go to the **EcoLabs** tab. Click the **Microphone** icon.
     *   Say clearly: *"Go to Document Vault"*.
     *   The app will capture the command and automatically switch tabs to the Document Vault!
+2b. **Show Real Portal Autofill (Massive Pitch Advantage):**
+    *   Load the Chrome Extension (Menu -> Extensions -> Manage Extensions -> Load Unpacked -> Select `/extension` folder).
+    *   Open `extension/test_form.html` in Chrome (simulating a real government application page).
+    *   Click the extension icon in Chrome's toolbar. It will connect to your running React app, fetch your student details from `localhost:8080` instantly, and display your card.
+    *   Click **⚡ Autofill This Portal Form** to watch it populate name, state, gender, income, category, score, phone and email fields in 1 click!
 3.  **Demonstrate AI OCR:** 
     *   In the Document Locker, upload the **Income Certificate**.
     *   Watch the laser scan overlay and OCR log console.
