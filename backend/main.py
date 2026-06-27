@@ -1,6 +1,8 @@
 import os
 import shutil
 import uuid
+import requests
+import json
 from datetime import date, datetime
 from typing import List, Optional
 from fastapi import FastAPI, Depends, HTTPException, Header, UploadFile, File, Form
@@ -59,6 +61,17 @@ app.mount("/uploads", StaticFiles(directory="./uploads"), name="uploads")
 # Run crawler on startup
 @app.on_event("startup")
 def startup_event():
+    # Load .env file if it exists
+    env_paths = [".env", "backend/.env", "../.env"]
+    for path in env_paths:
+        if os.path.exists(path):
+            with open(path, "r") as f:
+                for line in f:
+                    line = line.strip()
+                    if line and not line.startswith("#") and "=" in line:
+                        k, v = line.split("=", 1)
+                        os.environ[k.strip()] = v.strip().strip('"').strip("'")
+    
     db = next(get_db())
     try:
         results = crawler.crawl_scholarships()
@@ -472,18 +485,122 @@ def get_documents(
 @app.post("/chatbot/query", response_model=schemas.ChatResponse)
 def query_chatbot(
     query: schemas.ChatQuery,
-    student: models.Student = Depends(get_current_student),
+    x_student_id: Optional[str] = Header(None),
     db: Session = Depends(get_db)
 ):
     """
     Answers: 'Am I eligible for X?', 'What documents do I need?', 'Explain this term'.
-    Simulates a smart keyword-based RAG query over the scholarship database and glossary definitions.
+    Uses Gemini API for intelligent, context-aware student mentoring. Falls back to static keywords on failure.
     """
+    student = None
+    if x_student_id:
+        student = db.query(models.Student).filter(models.Student.id == x_student_id).first()
+
+    scholarships = db.query(models.Scholarship).all()
+    
+    applications = []
+    if student:
+        applications = db.query(models.Application).filter(models.Application.student_id == student.id).all()
+
+    api_key = os.getenv("GEMINI_API_KEY")
+    if api_key:
+        student_info = "No student profile loaded yet."
+        if student:
+            student_info = (
+                f"Name: {student.name or 'N/A'}\n"
+                f"Email: {student.email or 'N/A'}\n"
+                f"Phone: {student.phone or 'N/A'}\n"
+                f"First-Generation Student: {student.is_first_gen}\n"
+                f"State: {student.state or 'N/A'}\n"
+                f"Course/Level: {student.course or 'N/A'}\n"
+                f"Year of Study: {student.year_of_study or 'N/A'}\n"
+                f"Annual Family Income: ₹{student.annual_family_income or 0}\n"
+                f"Category: {student.category or 'N/A'}\n"
+                f"Disability Status: {student.disability_status}\n"
+                f"Gender: {student.gender or 'N/A'}\n"
+                f"Academic Score/CGPA: {student.score or 'N/A'}"
+            )
+        
+        apps_info = "No active scholarship applications."
+        if student and applications:
+            apps_list = []
+            for app in applications:
+                sch_title = app.scholarship.title if app.scholarship else "Unknown Scholarship"
+                apps_list.append(
+                    f"- {sch_title} (Status: {app.status}, Progress: {app.progress_percent}%, Checklist: {app.checklist})"
+                )
+            apps_info = "\n".join(apps_list)
+
+        sch_list = []
+        for s in scholarships:
+            sch_list.append(
+                f"- ID: {s.id}\n"
+                f"  Title: {s.title}\n"
+                f"  Provider: {s.provider or 'N/A'}\n"
+                f"  Amount: ₹{s.amount or 0}\n"
+                f"  Deadline: {s.deadline.strftime('%Y-%m-%d') if s.deadline else 'N/A'}\n"
+                f"  Eligibility: {s.eligibility_criteria}\n"
+                f"  Required Documents: {[d.get('name') for d in (s.required_documents or [])]}"
+            )
+        sch_info = "\n\n".join(sch_list)
+
+        prompt = (
+            "You are Sarah Jenkins, an empathetic, encouraging, and highly knowledgeable AI College & Scholarship Mentor. "
+            "Your target audience is students, especially first-generation college students from low-income families in India. "
+            "Be friendly, structured, clear, and action-oriented. Provide step-by-step guidance. Use markdown (bullet points, bold text) for readability.\n\n"
+            "If the student profile is available, greet them by name, tailor your advice to their state, category, income, or grade, "
+            "and check if they are eligible for the scholarships in the database. Use their details to answer accurately.\n\n"
+            "If the student asks about a specific document (e.g. Income Certificate, Aadhaar Seeding, Domicile, Bonafide), "
+            "give them practical advice on how to get it (e.g. via state digital portals like Seva Sindhu, Aaple Sarkar, e-District, or college administration).\n\n"
+            "Here is the context:\n"
+            "=== STUDENT PROFILE ===\n"
+            f"{student_info}\n\n"
+            "=== STUDENT'S APPLICATIONS ===\n"
+            f"{apps_info}\n\n"
+            "=== AVAILABLE SCHOLARSHIPS IN SYSTEM ===\n"
+            f"{sch_info}\n\n"
+            "=== USER MESSAGE ===\n"
+            f"{query.message}\n\n"
+            "Response (Reply directly to the student in their preferred language or the language of their query. "
+            "Always maintain your identity as Sarah Jenkins. Keep your answer under 3-4 short paragraphs):"
+        )
+
+        url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent?key={api_key}"
+        headers = {"Content-Type": "application/json"}
+        payload = {
+            "contents": [{
+                "parts": [{
+                    "text": prompt
+                }]
+            }]
+        }
+        try:
+            response = requests.post(url, headers=headers, json=payload, timeout=12)
+            if response.status_code == 200:
+                resp_json = response.json()
+                reply_text = resp_json["candidates"][0]["content"]["parts"][0]["text"]
+                if reply_text:
+                    return schemas.ChatResponse(reply=reply_text.strip())
+        except Exception as e:
+            print(f"[Chatbot Error] Gemini API call failed: {e}")
+
+    # --- FALLBACK KEYWORD-BASED RAG ---
     msg = query.message.lower()
     reply = ""
 
+    # Check for simple greetings
+    words = msg.translate(str.maketrans("", "", "!?,.")).split()
+    is_greeting_only = len(words) <= 3 and any(w in ["hello", "hi", "hey", "namaste", "नमस्ते", "ನಮಸ್ತೆ"] for w in words)
+    
+    if is_greeting_only:
+        if any(w in ["ನಮಸ್ತೆ"] for w in words):
+            reply = "ನಮಸ್ತೆ! ನಾನು ಸಾರಾ, ನಿಮ್ಮ ಕಾಲೇಜು ಮತ್ತು ವಿದ್ಯಾರ್ಥಿವೇತನ ಮಾರ್ಗದರ್ಶಿ. ನಾನು ನಿಮಗೆ ಹೇಗೆ ಸಹಾಯ ಮಾಡಬಹುದು?"
+        elif any(w in ["नमस्ते"] for w in words):
+            reply = "नमस्ते! मैं सारा हूँ, आपकी कॉलेज और स्कॉलरशिप मेंटॉर। मैं आपकी क्या मदद कर सकती हूँ?"
+        else:
+            reply = "Hello! I am Sarah, your AI College & Scholarship Mentor. How can I help you today?"
     # Check for specific FAQ keywords first
-    if "income" in msg or "tehsildar" in msg or "certificate" in msg:
+    elif "income" in msg or "tehsildar" in msg or "certificate" in msg:
         reply = (
             "To get a Tehsildar Income Certificate, you must apply through your state's digital service portal "
             "(such as Seva Sindhu in Karnataka, MahaOnline in Maharashtra, or e-District in Delhi/UP) or visit your nearest "
@@ -512,7 +629,6 @@ def query_chatbot(
             reply = "I would be happy to review your scholarship essay! Please paste your draft essay here, and I'll give you feedback."
     else:
         # Search the database for matching scholarships
-        scholarships = db.query(models.Scholarship).all()
         matched_sch = []
         for sch in scholarships:
             if sch.id in msg or sch.title.lower() in msg or (sch.provider and sch.provider.lower() in msg):
@@ -539,14 +655,98 @@ def query_chatbot(
                 f"You will need the following documents: {', '.join([d.get('name') for d in (sch.required_documents or [])])}."
             )
         else:
-            # General fallback response
-            reply = (
-                "That is a great query! Paving the path to higher education can be confusing when you are doing it "
-                "for the first time in your family. Tell me more about what you're working on, or ask about specific "
-                "scholarships like Pragati or HDFC, and I'll guide you step-by-step!"
-            )
+            # --- EXTENDED LOCAL KEYWORD MATCHING (IF NOT SPECIFIC SCHOLARSHIP) ---
+            if any(kw in msg for kw in ["best", "recommend", "match", "eligible", "which", "find"]):
+                reply = (
+                    "To find the best scholarships, please complete your student profile on the dashboard. "
+                    "Our system automatically matches your CGPA/grades, state of residence, family income, and category "
+                    "to show you exact matches you qualify for. Navigate to the main dashboard to see your eligible scholarships list!"
+                )
+            elif any(kw in msg for kw in ["step", "how to apply", "process", "procedure", "how do i", "how can i apply", "guideline"]):
+                reply = (
+                    "Here is how to apply step-by-step:\n"
+                    "1. Find matching schemes in the 'Scholarships' tab.\n"
+                    "2. Read the eligibility rules (GPA, caste, and income limits).\n"
+                    "3. Gather your documents (Income certificate, Bonafide letter, bank statement).\n"
+                    "4. Ensure your bank account is seeded with Aadhaar for DBT transfer.\n"
+                    "5. Apply on the official NSP/provider portal before the closing date."
+                )
+            elif any(kw in msg for kw in ["deadline", "closing date", "last date", "due date", "when to apply"]):
+                reply = (
+                    "You can find the closing date/deadline for each scheme listed in the 'Scholarships' tab. "
+                    "It is highly recommended to submit your application and upload verified certificates at least "
+                    "a week before the deadline to prevent issues from portal traffic congestion."
+                )
+            else:
+                # General fallback response
+                reply = (
+                    "I'm here to help you navigate your college and scholarship applications! "
+                    "You can ask me questions like:\n"
+                    "- \"How do I link my **Aadhaar** to my bank account?\"\n"
+                    "- \"What are the steps to get an **Income Certificate**?\"\n"
+                    "- \"How can I request a **Bonafide Certificate** from my college?\"\n"
+                    "- \"Which scholarship is the **best scholarship** for me?\"\n"
+                    "- \"What are the **steps to apply**?\"\n"
+                    "Or paste your draft essay here and I'll review it for you!"
+                )
 
     return schemas.ChatResponse(reply=reply)
+
+from pydantic import BaseModel
+
+class TranslateQuery(BaseModel):
+    text: str
+    target_lang: str
+
+@app.post("/chatbot/translate")
+def translate_text(query: TranslateQuery):
+    """
+    Translates a chatbot message dynamically into a target language using Gemini.
+    """
+    api_key = os.getenv("GEMINI_API_KEY")
+    if api_key:
+        lang_names = {"en": "English", "hi": "Hindi", "kn": "Kannada"}
+        target_name = lang_names.get(query.target_lang, "English")
+        
+        prompt = (
+            f"Translate the following text to {target_name}. "
+            "Maintain the tone and meaning, but return ONLY the direct translation. "
+            "Do not add any greetings, preambles, notes, quotes, or markdown wrappers.\n\n"
+            f"Text to translate:\n{query.text}"
+        )
+        url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent?key={api_key}"
+        headers = {"Content-Type": "application/json"}
+        payload = {
+            "contents": [{
+                "parts": [{
+                    "text": prompt
+                }]
+            }]
+        }
+        try:
+            response = requests.post(url, headers=headers, json=payload, timeout=10)
+            if response.status_code == 200:
+                resp_json = response.json()
+                reply_text = resp_json["candidates"][0]["content"]["parts"][0]["text"]
+                if reply_text:
+                    return {"translated_text": reply_text.strip()}
+        except Exception as e:
+            print(f"[Translate Error] Gemini translation failed: {e}")
+            
+    # Fallback to local heuristic translations or the original text
+    text_lower = query.text.lower()
+    if query.target_lang == "hi":
+        if "bonafide" in text_lower:
+            return {"translated_text": "बोनाफाइड सर्टिफिकेट आपके कॉलेज द्वारा जारी किया जाने वाला एक दस्तावेज है जो यह प्रमाणित करता है कि आप वहां के नियमित छात्र हैं।"}
+        if "income" in text_lower:
+            return {"translated_text": "आय प्रमाण पत्र (Income Certificate) एक आधिकारिक सरकारी दस्तावेज है जो आपकी पारिवारिक आय को प्रमाणित करता है।"}
+    elif query.target_lang == "kn":
+        if "bonafide" in text_lower:
+            return {"translated_text": "ಬೋನಾಫೈಡ್ ಪ್ರಮಾಣಪತ್ರವು ನೀವು ಕಾಲೇಜಿನ ವಿದ್ಯಾರ್ಥಿ ಎಂದು ಸಾಬೀತುಪಡಿಸುವ ಅಧಿಕೃತ ದಾಖಲೆಯಾಗಿದೆ."}
+        if "income" in text_lower:
+            return {"translated_text": "ಆದಾಯ ಪ್ರಮಾಣಪತ್ರವು ನಿಮ್ಮಕುಟುಂಬದ ವಾರ್ಷಿಕ ಆದಾಯವನ್ನು ಅಧಿಕೃತವಾಗಿ ದೃಢೀಕರಿಸುವ ದಾಖಲೆಯಾಗಿದೆ."}
+            
+    return {"translated_text": query.text}
 
 # --- Notification Log Endpoint (WhatsApp Outbox) ---
 
@@ -584,6 +784,7 @@ async def daily_scholarship_scanner():
             if not existing:
                 print(f"[Crawler Scanner] Discovered new program: '{crawl_title}'. Anchoring to database...")
                 new_sch = models.Scholarship(
+                    id="tata-firstgen-fellowship",
                     title=crawl_title,
                     provider="Tata Trusts Foundation",
                     description="Special CSR grant for first-generation students pursuing undergraduate engineering courses in India.",

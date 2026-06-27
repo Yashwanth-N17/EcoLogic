@@ -17,18 +17,18 @@ import {
   RefreshCw
 } from 'lucide-react';
 
-import { SCHOLARSHIPS, MOCK_MENTOR_CHAT } from './data';
-import { TRANSLATIONS } from './data/translations';
+import { SCHOLARSHIPS, MOCK_MENTOR_CHAT, TRANSLATIONS } from './data';
 import Onboarding from './components/Onboarding';
 import Dashboard from './components/Dashboard';
 import ScholarshipListing from './components/ScholarshipListing';
 import ScholarshipDetail from './components/ScholarshipDetail';
 import Tracker from './components/Tracker';
 import ResourceCenter from './components/ResourceCenter';
-import MentorChat from './components/MentorChat';
 import WelcomeScreen from './components/WelcomeScreen';
 import './premium.css';
 import EcoLabs from './components/EcoLabs';
+import FloatingChatbot from './components/FloatingChatbot';
+import DocumentVault from './components/DocumentVault';
 
 export default function App() {
   // --- Persistent State ---
@@ -84,77 +84,83 @@ export default function App() {
       }
       try {
         setLoading(true);
-        // 1. Fetch profile
+        // 1. Fetch profile (tries backend, falls back to localStorage via our api layer)
         const profileData = await api.getProfile(studentId);
         const normalizedProfile = {
           ...profileData,
-          academicLevel: profileData.course,
-          income: String(Math.round(profileData.annual_family_income)),
-          firstGen: profileData.is_first_gen ? 'yes' : 'no'
+          academicLevel: profileData.course || profileData.academicLevel,
+          income: profileData.income || String(Math.round(profileData.annual_family_income || 0)),
+          firstGen: profileData.is_first_gen !== undefined
+            ? (profileData.is_first_gen ? 'yes' : 'no')
+            : profileData.firstGen,
         };
         setProfile(normalizedProfile);
 
+        const activeStudentId = profileData.id || studentId;
+        if (activeStudentId !== studentId) {
+          setStudentId(activeStudentId);
+        }
+
         // 2. Fetch applications
-        const appsData = await api.getApplications(studentId);
+        const appsData = await api.getApplications(activeStudentId);
         const appsObj = {};
         appsData.forEach(app => {
           appsObj[app.scholarship_id] = {
             status: app.status,
-            checklist: app.checklist,
-            essay: app.essay,
+            checklist: app.checklist || {},
+            essay: app.essay || '',
             startedAt: app.updated_at,
-            submittedAt: app.applied_at
+            submittedAt: app.applied_at,
           };
         });
         setApplications(appsObj);
 
-        // 3. Fetch documents
-        const docsData = await api.getDocuments(studentId);
-        setVaultDocs(prev => {
-          let updatedDocs = prev.map(d => {
-            const uploaded = docsData.find(u => u.doc_type === d.id);
-            if (uploaded) {
-              return {
-                ...d,
-                status: 'Uploaded',
-                file: uploaded.file_url.split(/[\/\\]/).pop(),
-                size: '2.4 MB',
-                date: new Date(uploaded.uploaded_at).toLocaleDateString('en-IN')
-              };
+        // 3. Fetch documents (only available when backend online)
+        const docsData = await api.getDocuments(activeStudentId);
+        if (docsData.length > 0) {
+          setVaultDocs(prev => {
+            let updatedDocs = prev.map(d => {
+              const uploaded = docsData.find(u => u.doc_type === d.id);
+              if (uploaded) {
+                return {
+                  ...d,
+                  status: 'Uploaded',
+                  file: uploaded.file_url.split(/[\/\\]/).pop(),
+                  size: '2.4 MB',
+                  date: new Date(uploaded.uploaded_at).toLocaleDateString('en-IN'),
+                };
+              }
+              return d;
+            });
+            const hasCasteSlot = updatedDocs.some(d => d.id === 'caste');
+            const needsCasteSlot = normalizedProfile.category && normalizedProfile.category !== 'General';
+            if (needsCasteSlot && !hasCasteSlot) {
+              const uploadedCaste = docsData.find(u => u.doc_type === 'caste');
+              updatedDocs = [...updatedDocs, {
+                id: 'caste',
+                name: `Caste Certificate (${normalizedProfile.category})`,
+                status: uploadedCaste ? 'Uploaded' : 'Missing',
+                file: uploadedCaste ? uploadedCaste.file_url.split(/[\/\\]/).pop() : null,
+                size: uploadedCaste ? '2.4 MB' : null,
+                date: uploadedCaste ? new Date(uploadedCaste.uploaded_at).toLocaleDateString('en-IN') : null,
+              }];
+            } else if (!needsCasteSlot && hasCasteSlot) {
+              updatedDocs = updatedDocs.filter(d => d.id !== 'caste');
             }
-            return d;
+            return updatedDocs;
           });
-          
-          // caste certificate dynamic slot
-          const hasCasteSlot = updatedDocs.some(d => d.id === 'caste');
-          const needsCasteSlot = normalizedProfile.category && normalizedProfile.category !== 'General';
-          if (needsCasteSlot && !hasCasteSlot) {
-            const uploadedCaste = docsData.find(u => u.doc_type === 'caste');
-            updatedDocs = [...updatedDocs, {
-              id: 'caste',
-              name: `Caste Certificate (${normalizedProfile.category})`,
-              status: uploadedCaste ? 'Uploaded' : 'Missing',
-              file: uploadedCaste ? uploadedCaste.file_url.split(/[\/\\]/).pop() : null,
-              size: uploadedCaste ? '2.4 MB' : null,
-              date: uploadedCaste ? new Date(uploadedCaste.uploaded_at).toLocaleDateString('en-IN') : null
-            }];
-          } else if (!needsCasteSlot && hasCasteSlot) {
-            updatedDocs = updatedDocs.filter(d => d.id !== 'caste');
-          }
-          return updatedDocs;
-        });
+        }
 
-        // 4. Fetch notifications (WhatsApp & In-App)
-        const notifData = await api.getNotifications(studentId);
+        // 4. Fetch notifications
+        const notifData = await api.getNotifications(activeStudentId);
         const mappedNotifs = notifData.map(n => {
           let type = 'in-app';
           let title = 'Alert';
-          if (n.message.includes('[WHATSAPP]') || n.message.includes('[META]') || n.message.includes('[TWILIO]') || n.message.includes('WhatsApp')) {
+          if (n.message && (n.message.includes('[WHATSAPP]') || n.message.includes('[META]') || n.message.includes('WhatsApp'))) {
             type = 'whatsapp';
             title = 'Meta WhatsApp Alert Sent';
-          } else if (n.message.includes('OCR') || n.message.includes('Document')) {
+          } else if (n.message && n.message.includes('OCR')) {
             title = 'AI OCR Document Extracted';
-          } else if (n.message.includes('Profile')) {
             title = 'Profile Configured';
           }
           return {
@@ -328,9 +334,23 @@ export default function App() {
       const createdStudent = await api.createProfile(profileData);
       localStorage.setItem('econav_student_id', createdStudent.id);
       setStudentId(createdStudent.id);
+      // Set profile directly so UI updates immediately
+      setProfile({
+        ...profileData,
+        id: createdStudent.id,
+        academicLevel: createdStudent.course || profileData.academicLevel,
+        income: String(Math.round(createdStudent.annual_family_income || profileData.income)),
+        firstGen: (createdStudent.is_first_gen !== undefined)
+          ? (createdStudent.is_first_gen ? 'yes' : 'no')
+          : profileData.firstGen,
+      });
     } catch (err) {
-      console.error("Failed to save profile on onboarding", err);
-      alert("Backend API connection failed. Please ensure FastAPI is running.");
+      console.error('Failed to save profile on onboarding', err);
+      // Still proceed with local profile so the app works offline
+      const localId = `local_${Date.now()}`;
+      localStorage.setItem('econav_student_id', localId);
+      setStudentId(localId);
+      setProfile({ ...profileData, id: localId });
     } finally {
       setLoading(false);
     }
@@ -354,33 +374,23 @@ export default function App() {
     const scholarship = scholarships.find(s => s.id === id);
     if (!scholarship) return;
 
-    // Seed empty checklist based on scholarship requirements
     const initialChecklist = {};
-    scholarship.requirements.forEach(req => {
-      initialChecklist[req.id] = false;
-    });
+    scholarship.requirements.forEach(req => { initialChecklist[req.id] = false; });
 
     try {
-      const createdApp = await api.saveApplication(studentId, id, 'In Progress', initialChecklist, '');
+      await api.saveApplication(studentId, id, 'In Progress', initialChecklist, '');
       setApplications(prev => ({
         ...prev,
         [id]: {
-          status: createdApp.status,
-          checklist: createdApp.checklist,
-          essay: createdApp.essay,
-          startedAt: createdApp.updated_at
+          status: 'In Progress',
+          checklist: initialChecklist,
+          essay: '',
+          startedAt: new Date().toISOString(),
         }
       }));
-
-      // Auto-save/bookmark the scholarship if it wasn't saved already
-      setSavedScholarships(prev => {
-        if (!prev.includes(id)) {
-          return [...prev, id];
-        }
-        return prev;
-      });
+      setSavedScholarships(prev => prev.includes(id) ? prev : [...prev, id]);
     } catch (err) {
-      console.error("Failed to start application on server", err);
+      console.error('Failed to start application', err);
     }
   };
 
@@ -388,25 +398,18 @@ export default function App() {
     const app = applications[scholarshipId];
     if (!app) return;
 
-    const newChecklist = {
-      ...app.checklist,
-      [reqId]: !app.checklist[reqId]
-    };
+    const newChecklist = { ...app.checklist, [reqId]: !app.checklist[reqId] };
+
+    // Update state immediately for snappy UI
+    setApplications(prev => ({
+      ...prev,
+      [scholarshipId]: { ...app, checklist: newChecklist }
+    }));
 
     try {
-      const updatedApp = await api.updateApplication(studentId, scholarshipId, {
-        checklist: newChecklist
-      });
-      
-      setApplications(prev => ({
-        ...prev,
-        [scholarshipId]: {
-          ...app,
-          checklist: updatedApp.checklist
-        }
-      }));
+      await api.updateApplication(studentId, scholarshipId, { checklist: newChecklist });
     } catch (err) {
-      console.error("Failed to toggle checklist item", err);
+      console.error('Failed to sync checklist toggle', err);
     }
   };
 
@@ -414,20 +417,16 @@ export default function App() {
     const app = applications[scholarshipId];
     if (!app) return;
 
+    // Update state immediately
+    setApplications(prev => ({
+      ...prev,
+      [scholarshipId]: { ...app, essay: essayText }
+    }));
+
     try {
-      const updatedApp = await api.updateApplication(studentId, scholarshipId, {
-        essay: essayText
-      });
-      
-      setApplications(prev => ({
-        ...prev,
-        [scholarshipId]: {
-          ...app,
-          essay: updatedApp.essay
-        }
-      }));
+      await api.updateApplication(studentId, scholarshipId, { essay: essayText });
     } catch (err) {
-      console.error("Failed to save essay", err);
+      console.error('Failed to sync essay save', err);
     }
   };
 
@@ -761,14 +760,7 @@ export default function App() {
                 <BookOpen size={18} /> {t('resources')}
               </button>
             </li>
-            <li>
-              <button 
-                className={`nav-link-btn ${activeTab === 'mentor' ? 'active' : ''}`}
-                onClick={() => handleNavigate('mentor')}
-              >
-                <MessageSquare size={18} /> {t('mentor')}
-              </button>
-            </li>
+
             <li>
               <button 
                 className={`nav-link-btn ${activeTab === 'vault' ? 'active' : ''}`}
@@ -894,13 +886,6 @@ export default function App() {
           />
         )}
 
-        {activeTab === 'mentor' && (
-          <MentorChat 
-            studentId={studentId}
-            messages={messages}
-            onSendMessage={handleSendMessage}
-          />
-        )}
 
         {activeTab === 'vault' && (
           <DocumentVault 
@@ -993,6 +978,8 @@ export default function App() {
           </form>
         </div>
       )}
+      {/* Global Floating AI Chatbot */}
+      <FloatingChatbot studentId={studentId} language={language} />
     </div>
   );
 }
