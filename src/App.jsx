@@ -13,7 +13,8 @@ import {
   FolderLock,
   Bell,
   Globe,
-  Beaker
+  Beaker,
+  RefreshCw
 } from 'lucide-react';
 
 import { SCHOLARSHIPS, MOCK_MENTOR_CHAT } from './data';
@@ -26,7 +27,7 @@ import Tracker from './components/Tracker';
 import ResourceCenter from './components/ResourceCenter';
 import MentorChat from './components/MentorChat';
 import WelcomeScreen from './components/WelcomeScreen';
-import DocumentVault from './components/DocumentVault';
+import './premium.css';
 import EcoLabs from './components/EcoLabs';
 
 export default function App() {
@@ -37,6 +38,7 @@ export default function App() {
 
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [scholarships, setScholarships] = useState([]);
 
   const [savedScholarships, setSavedScholarships] = useState(() => {
     const saved = localStorage.getItem('firstgen_saved');
@@ -201,6 +203,77 @@ export default function App() {
     localStorage.setItem('firstgen_messages', JSON.stringify(messages));
   }, [messages]);
 
+  // Fetch live scholarships – can be called on mount or after manual crawl trigger
+  const fetchLiveScholarships = async () => {
+    try {
+      const liveSchs = await api.getScholarships();
+      if (liveSchs && liveSchs.length > 0) {
+        const normalized = liveSchs.map(s => {
+          const amt = s.amount ? Number(s.amount) : 10000;
+          const formattedAmt = `₹${amt.toLocaleString('en-IN')} / year`;
+          const reqs = (s.required_documents || []).map(r => ({
+            id: r.id || r.doc_type || 'aadhaar',
+            name: r.name || 'Required Certificate',
+            jargonTerm: r.jargonTerm || 'Official Certificate',
+            plainExplanation: r.plainExplanation || 'An official document required for verification.',
+            mentorTip: r.mentorTip || 'Ensure it is clean and legible.'
+          }));
+          const criteria = s.eligibility_criteria || {};
+          const stateRes = criteria.stateResidency && criteria.stateResidency.length > 0 ? criteria.stateResidency : null;
+
+          return {
+            id: s.id,
+            title: s.title,
+            provider: s.provider || 'Scholarship Provider',
+            partnerBadge: s.tags && s.tags.length > 0 ? s.tags[0].toUpperCase() : 'Verified',
+            amount: amt,
+            amountFormatted: formattedAmt,
+            deadline: s.deadline || '2026-12-31',
+            category: s.tags && s.tags.includes('merit') ? 'Merit-based' : 'Need-based',
+            source: s.tags && s.tags.includes('private') ? 'Private' : 'Government',
+            isLive: true,
+            featured: s.is_verified || false,
+            applicationMode: 'Official portal',
+            lastUpdated: 'Updated recently',
+            tags: s.tags || [],
+            requirementsDescription: s.description || '',
+            eligibilityCriteria: {
+              gpaMin: criteria.gpaMin ? Number(criteria.gpaMin) : 5.0,
+              incomeMax: criteria.incomeMax ? Number(criteria.incomeMax) : 800000,
+              firstGenRequired: criteria.firstGenRequired === 'yes',
+              stateResidency: stateRes,
+              academicLevel: criteria.academicLevel || ['Class 12', 'Undergrad'],
+              casteRequired: criteria.casteRequired || []
+            },
+            requirements: reqs,
+            details: s.description || 'Full compulsory course fees coverage and maintenance allowances.',
+            essayPrompt: s.essayPrompt || 'Write a short personal statement detailing how this scholarship will enable you to continue your higher education.',
+            officialUrl: s.application_link || 'https://scholarships.gov.in',
+            isVerified: s.is_verified || false
+          };
+        });
+        setScholarships(normalized);
+      }
+    } catch (err) {
+      console.warn('Failed to fetch live scholarships, using local fallback:', err);
+    }
+  };
+
+  // Trigger manual crawl and reload scholarships
+  const handleLoadNewScholarships = async () => {
+    try {
+      await api.triggerCrawl();
+      await fetchLiveScholarships();
+    } catch (err) {
+      console.error('Error loading new scholarships:', err);
+    }
+  };
+
+  // Run fetch on component mount
+  useEffect(() => {
+    fetchLiveScholarships();
+  }, []);
+
   const t = (key) => {
     return TRANSLATIONS[language]?.[key] || TRANSLATIONS['en']?.[key] || key;
   };
@@ -278,7 +351,7 @@ export default function App() {
   };
 
   const handleStartApplication = async (id) => {
-    const scholarship = SCHOLARSHIPS.find(s => s.id === id);
+    const scholarship = scholarships.find(s => s.id === id);
     if (!scholarship) return;
 
     // Seed empty checklist based on scholarship requirements
@@ -359,7 +432,7 @@ export default function App() {
   };
 
   const handleSubmitApplication = async (scholarshipId) => {
-    const scholarship = SCHOLARSHIPS.find(s => s.id === scholarshipId);
+    const scholarship = scholarships.find(s => s.id === scholarshipId);
     const app = applications[scholarshipId];
     if (!app) return;
 
@@ -503,7 +576,7 @@ export default function App() {
     return <Onboarding onComplete={handleOnboardingComplete} />;
   }
 
-  const selectedScholarship = SCHOLARSHIPS.find(s => s.id === selectedScholarshipId);
+  const selectedScholarship = scholarships.find(s => s.id === selectedScholarshipId);
 
   return (
     <div className="app-container">
@@ -593,7 +666,7 @@ export default function App() {
             {showNotifications && (
               <div style={{
                 position: 'fixed',
-                left: '260px',
+                left: '20px',
                 top: '75px',
                 width: '320px',
                 background: '#ffffff',
@@ -774,7 +847,7 @@ export default function App() {
         {activeTab === 'dashboard' && (
           <Dashboard 
             profile={profile} 
-            scholarships={SCHOLARSHIPS}
+            scholarships={scholarships}
             savedScholarships={savedScholarships}
             applications={applications}
             onNavigate={handleNavigate}
@@ -782,18 +855,29 @@ export default function App() {
         )}
 
         {activeTab === 'scholarships' && (
-          <ScholarshipListing 
-            profile={profile}
-            scholarships={SCHOLARSHIPS}
-            savedScholarships={savedScholarships}
-            onSaveToggle={handleSaveToggle}
-            onOpenDetail={setSelectedScholarshipId}
-          />
+          <>
+            <div className="flex justify-center my-4">
+              <button
+                className="premium-button group flex items-center gap-2"
+                onClick={handleLoadNewScholarships}
+              >
+                <RefreshCw className="w-5 h-5 transition-transform group-hover:rotate-180" />
+                Load New Scholarships
+              </button>
+            </div>
+            <ScholarshipListing 
+              profile={profile}
+              scholarships={scholarships}
+              savedScholarships={savedScholarships}
+              onSaveToggle={handleSaveToggle}
+              onOpenDetail={setSelectedScholarshipId}
+            />
+          </>
         )}
 
         {activeTab === 'tracker' && (
           <Tracker 
-            scholarships={SCHOLARSHIPS}
+            scholarships={scholarships}
             savedScholarships={savedScholarships}
             applications={applications}
             onStartApplication={handleStartApplication}

@@ -14,11 +14,16 @@ import schemas
 import ocr
 import notifications
 import seed
+import crawler
 
 # Create database tables
 Base.metadata.create_all(bind=engine)
 
-app = FastAPI(title="EcoLogic Scholar Mate Backend API")
+app = FastAPI(
+    title="ScholarMate API",
+    description="Backend API supporting EcoLogic ScholarMate dashboard for first-generation students in India",
+    version="1.0.0"
+)
 
 # Setup CORS
 app.add_middleware(
@@ -29,16 +34,29 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+import os
+# Ensure uploads directory exists
+os.makedirs("./uploads", exist_ok=True)
 app.mount("/uploads", StaticFiles(directory="./uploads"), name="uploads")
 
-# Run seeder on startup
+# Run crawler on startup
 @app.on_event("startup")
 def startup_event():
     db = next(get_db())
     try:
-        seed.seed_scholarships(db)
+        crawler.crawl_scholarships()
+    except Exception as e:
+        print(f"Startup crawler error: {e}")
     finally:
         db.close()
+
+@app.post("/crawl")
+def trigger_crawl():
+    try:
+        crawler.crawl_scholarships()
+        return {"status": "Crawler executed"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Crawler error: {e}")
 
 # Directory for file uploads
 UPLOAD_DIR = "./uploads"

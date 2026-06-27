@@ -73,6 +73,15 @@ export const api = {
     return res.json();
   },
 
+  // Trigger backend crawler to fetch latest scholarships
+  async triggerCrawl() {
+    const res = await fetch(`${API_BASE}/crawl`, { method: 'POST' });
+    if (!res.ok) {
+      throw new Error('Failed to trigger crawler');
+    }
+    return res.json();
+  },
+
   async getApplications(studentId) {
     const res = await fetch(`${API_BASE}/applications`, {
       headers: getHeaders(studentId)
