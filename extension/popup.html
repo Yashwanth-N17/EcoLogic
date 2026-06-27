@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <style>
+    :root {
+      --primary: #0ea5e9;
+      --primary-dark: #0284c7;
+      --bg: #0f172a;
+      --card: #1e293b;
+      --border: rgba(255, 255, 255, 0.08);
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+      --success: #10b981;
+    }
+    
+    body {
+      width: 320px;
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      padding: 16px;
+      box-sizing: border-box;
+    }
+
+    h3 {
+      margin: 0 0 4px 0;
+      font-size: 16px;
+      font-weight: 700;
+    }
+
+    p {
+      margin: 0;
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 12px;
+      margin-bottom: 16px;
+    }
+
+    .logo-badge {
+      background: linear-gradient(135deg, var(--primary), #6366f1);
+      color: white;
+      width: 28px;
+      height: 28px;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      font-size: 14px;
+    }
+
+    .profile-card {
+      background-color: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px;
+      margin-bottom: 16px;
+    }
+
+    .profile-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 12px;
+      padding: 6px 0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+    }
+
+    .profile-row:last-child {
+      border-bottom: none;
+    }
+
+    .label {
+      color: var(--text-muted);
+    }
+
+    .value {
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    .btn {
+      width: 100%;
+      background: linear-gradient(135deg, var(--primary), #6366f1);
+      color: white;
+      border: none;
+      padding: 10px;
+      border-radius: 8px;
+      font-weight: 700;
+      font-size: 13px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      box-shadow: 0 4px 12px rgba(14, 165, 233, 0.2);
+      transition: all 0.2s;
+    }
+
+    .btn:hover {
+      opacity: 0.9;
+      transform: translateY(-1px);
+    }
+
+    .btn:disabled {
+      background: #334155;
+      color: #64748b;
+      box-shadow: none;
+      cursor: not-allowed;
+    }
+
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 11px;
+      font-weight: 600;
+      padding: 2px 8px;
+      border-radius: 9999px;
+      margin-top: 4px;
+    }
+
+    .status-badge.connected {
+      background-color: rgba(16, 185, 129, 0.15);
+      color: var(--success);
+    }
+
+    .status-badge.disconnected {
+      background-color: rgba(239, 68, 68, 0.15);
+      color: #f87171;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div class="logo-badge">E</div>
+    <div>
+      <h3>ScholarMate Autofill</h3>
+      <div id="connection-status" class="status-badge disconnected">Disconnected</div>
+    </div>
+  </div>
+
+  <div id="profile-container" style="display: none;">
+    <div class="profile-card">
+      <div class="profile-row">
+        <span class="label">Name</span>
+        <span id="prof-name" class="value">-</span>
+      </div>
+      <div class="profile-row">
+        <span class="label">Category</span>
+        <span id="prof-cat" class="value">-</span>
+      </div>
+      <div class="profile-row">
+        <span class="label">Income</span>
+        <span id="prof-inc" class="value">-</span>
+      </div>
+      <div class="profile-row">
+        <span class="label">State</span>
+        <span id="prof-state" class="value">-</span>
+      </div>
+      <div class="profile-row">
+        <span class="label">Marks/GPA</span>
+        <span id="prof-score" class="value">-</span>
+      </div>
+    </div>
+
+    <button id="autofill-btn" class="btn">
+      ⚡ Autofill This Portal Form
+    </button>
+  </div>
+
+  <div id="no-profile-view" style="padding: 12px; text-align: center;">
+    <p style="margin-bottom: 12px;">No active ScholarMate session found.</p>
+    <p style="font-size: 11px; margin-bottom: 16px;">Please open your ScholarMate web dashboard first to link your profile.</p>
+    <button id="retry-btn" class="btn" style="background: #334155; box-shadow: none;">
+      🔄 Sync Profile Session
+    </button>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>

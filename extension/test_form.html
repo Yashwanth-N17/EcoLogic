@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Autofill Demo Form</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 500px;
+      margin: 40px auto;
+      padding: 20px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      background-color: #fcfcfc;
+    }
+    .form-group {
+      margin-bottom: 15px;
+    }
+    label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: bold;
+    }
+    input[type="text"], input[type="number"], select {
+      width: 100%;
+      padding: 8px;
+      box-sizing: border-box;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      transition: all 0.3s;
+    }
+    button {
+      padding: 10px 15px;
+      background-color: #0ea5e9;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <h2>Scholarship Application Form (Demo)</h2>
+  <p>Use the ScholarMate Chrome Extension to autofill this form!</p>
+  <hr style="margin-bottom: 20px;">
+  
+  <form id="demo-form" onsubmit="event.preventDefault(); alert('Form submitted!');">
+    <div class="form-group">
+      <label for="fullName">Full Name</label>
+      <input type="text" id="fullName" placeholder="Enter Full Name">
+    </div>
+    
+    <div class="form-group">
+      <label for="gender">Gender / Sex</label>
+      <select id="gender">
+        <option value="">Select Gender</option>
+        <option value="Male">Male</option>
+        <option value="Female">Female</option>
+        <option value="Other">Other</option>
+      </select>
+    </div>
+    
+    <div class="form-group">
+      <label for="domicile_state">Domicile / Home State</label>
+      <input type="text" id="domicile_state" placeholder="e.g. Karnataka">
+    </div>
+    
+    <div class="form-group">
+      <label for="caste_category">Social Category / Caste</label>
+      <select id="caste_category">
+        <option value="">Select Category</option>
+        <option value="SC">SC</option>
+        <option value="ST">ST</option>
+        <option value="OBC">OBC</option>
+        <option value="EWS">EWS</option>
+        <option value="General">General</option>
+      </select>
+    </div>
+    
+    <div class="form-group">
+      <label for="annual_income">Annual Family Income</label>
+      <input type="text" id="annual_income" placeholder="Family Income">
+    </div>
+    
+    <div class="form-group">
+      <label for="gpa_score">Previous Exam Score / GPA</label>
+      <input type="text" id="gpa_score" placeholder="CGPA or Percentage">
+    </div>
+    
+    <div class="form-group">
+      <label for="mobile_phone">Mobile Number</label>
+      <input type="text" id="mobile_phone" placeholder="Phone Number">
+    </div>
+
+    <button type="submit">Submit Application</button>
+  </form>
+</body>
+</html>
