@@ -1,5 +1,9 @@
 // Content script to detect and autofill form fields on scholarship portals
 
+// Flag the page to let the React app know the extension is active
+document.documentElement.setAttribute('data-scholarmate-extension', 'active');
+window.dispatchEvent(new CustomEvent('ScholarMateExtensionLoaded'));
+
 // Heuristic matching function for form inputs
 function findField(keywords) {
   const inputs = document.querySelectorAll('input, select');

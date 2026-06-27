@@ -71,6 +71,7 @@ export default function App() {
 
   const [showNotifications, setShowNotifications] = useState(false);
   const [notifications, setNotifications] = useState([]);
+  const [extensionActive, setExtensionActive] = useState(false);
 
   // Fetch all user details from the backend if studentId exists
   useEffect(() => {
@@ -181,6 +182,16 @@ export default function App() {
   useEffect(() => {
     localStorage.setItem('econav_language', language);
   }, [language]);
+
+  useEffect(() => {
+    const checkExt = () => {
+      const active = document.documentElement.getAttribute('data-scholarmate-extension') === 'active';
+      setExtensionActive(active);
+    };
+    checkExt();
+    window.addEventListener('ScholarMateExtensionLoaded', checkExt);
+    return () => window.removeEventListener('ScholarMateExtensionLoaded', checkExt);
+  }, []);
 
   useEffect(() => {
     localStorage.setItem('firstgen_saved', JSON.stringify(savedScholarships));
@@ -725,6 +736,49 @@ export default function App() {
 
       {/* Main Workspace content */}
       <main className="main-content">
+        {!extensionActive && (
+          <div style={{
+            background: 'linear-gradient(135deg, rgba(14, 165, 233, 0.08) 0%, rgba(99, 102, 241, 0.08) 100%)',
+            border: '1px solid rgba(14, 165, 233, 0.25)',
+            borderRadius: '12px',
+            padding: '1rem 1.25rem',
+            marginBottom: '20px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            gap: '16px',
+            flexWrap: 'wrap'
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+              <span style={{ fontSize: '1.5rem' }}>🔌</span>
+              <div>
+                <strong style={{ display: 'block', color: 'var(--text-primary)', fontSize: '0.88rem', marginBottom: '2px' }}>
+                  Enable 1-Click Autofill Portal Extension
+                </strong>
+                <span style={{ color: 'var(--text-secondary)', fontSize: '0.78rem', lineHeight: '1.4' }}>
+                  Install the ScholarMate Chrome Extension to automatically populate forms and upload documents on real portal sites.
+                </span>
+              </div>
+            </div>
+            <button 
+              onClick={() => alert("To install:\n1. Open Chrome Menu -> Extensions -> Manage Extensions\n2. Turn on 'Developer mode' (top right)\n3. Click 'Load unpacked' and select the 'extension' directory in your project root!")}
+              style={{
+                background: 'linear-gradient(135deg, var(--primary), #6366f1)',
+                color: 'white',
+                border: 'none',
+                padding: '8px 14px',
+                borderRadius: '8px',
+                fontSize: '0.78rem',
+                fontWeight: '700',
+                cursor: 'pointer',
+                boxShadow: '0 3px 8px rgba(14, 165, 233, 0.2)'
+              }}
+            >
+              How to Install ⚙️
+            </button>
+          </div>
+        )}
+
         {activeTab === 'dashboard' && (
           <Dashboard 
             profile={profile} 
