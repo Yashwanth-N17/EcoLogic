@@ -23,10 +23,10 @@ import ScholarshipListing from './components/ScholarshipListing';
 import ScholarshipDetail from './components/ScholarshipDetail';
 import Tracker from './components/Tracker';
 import ResourceCenter from './components/ResourceCenter';
-import MentorChat from './components/MentorChat';
 import WelcomeScreen from './components/WelcomeScreen';
 import DocumentVault from './components/DocumentVault';
 import EcoLabs from './components/EcoLabs';
+import FloatingChatbot from './components/FloatingChatbot';
 
 export default function App() {
   // --- Persistent State ---
@@ -93,8 +93,13 @@ export default function App() {
         };
         setProfile(normalizedProfile);
 
+        const activeStudentId = profileData.id || studentId;
+        if (activeStudentId !== studentId) {
+          setStudentId(activeStudentId);
+        }
+
         // 2. Fetch applications
-        const appsData = await api.getApplications(studentId);
+        const appsData = await api.getApplications(activeStudentId);
         const appsObj = {};
         appsData.forEach(app => {
           appsObj[app.scholarship_id] = {
@@ -108,7 +113,7 @@ export default function App() {
         setApplications(appsObj);
 
         // 3. Fetch documents (only available when backend online)
-        const docsData = await api.getDocuments(studentId);
+        const docsData = await api.getDocuments(activeStudentId);
         if (docsData.length > 0) {
           setVaultDocs(prev => {
             let updatedDocs = prev.map(d => {
@@ -144,7 +149,7 @@ export default function App() {
         }
 
         // 4. Fetch notifications
-        const notifData = await api.getNotifications(studentId);
+        const notifData = await api.getNotifications(activeStudentId);
         const mappedNotifs = notifData.map(n => {
           let type = 'in-app';
           let title = 'Alert';
@@ -681,14 +686,7 @@ export default function App() {
                 <BookOpen size={18} /> {t('resources')}
               </button>
             </li>
-            <li>
-              <button 
-                className={`nav-link-btn ${activeTab === 'mentor' ? 'active' : ''}`}
-                onClick={() => handleNavigate('mentor')}
-              >
-                <MessageSquare size={18} /> {t('mentor')}
-              </button>
-            </li>
+
             <li>
               <button 
                 className={`nav-link-btn ${activeTab === 'vault' ? 'active' : ''}`}
@@ -811,13 +809,6 @@ export default function App() {
           />
         )}
 
-        {activeTab === 'mentor' && (
-          <MentorChat 
-            studentId={studentId}
-            messages={messages}
-            onSendMessage={handleSendMessage}
-          />
-        )}
 
         {activeTab === 'vault' && (
           <DocumentVault 
@@ -910,6 +901,8 @@ export default function App() {
           </form>
         </div>
       )}
+      {/* Global Floating AI Chatbot */}
+      <FloatingChatbot studentId={studentId} language={language} />
     </div>
   );
 }

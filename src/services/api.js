@@ -35,8 +35,10 @@ async function tryFetch(url, options = {}) {
   if (options.body && !(options.body instanceof FormData) && !headers['Content-Type']) {
     headers['Content-Type'] = 'application/json';
   }
+  const defaultTimeout = (url.includes('/chatbot') || url.includes('/upload')) ? 25000 : 3000;
+  const timeoutVal = options.timeout || defaultTimeout;
   const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 3000);
+  const timeout = setTimeout(() => controller.abort(), timeoutVal);
   try {
     const res = await fetch(`${API_BASE}${url}`, { ...options, headers, signal: controller.signal });
     clearTimeout(timeout);
@@ -87,7 +89,39 @@ export const api = {
     }
     // Fallback: localStorage
     const cached = local.getProfile();
-    if (cached) return cached;
+    if (cached) {
+      // The backend does not have the profile (or is offline), so let's try to sync it if the backend is online!
+      try {
+        const payload = {
+          name: cached.name,
+          email: cached.email || `${(cached.name || 'student').toLowerCase().replace(/\s+/g, '')}@scholarmate.app`,
+          phone: cached.phone || '+91 98765 43210',
+          is_first_gen: cached.firstGen === 'yes' || cached.is_first_gen === true,
+          state: cached.state,
+          course: cached.academicLevel || cached.course || 'Undergrad',
+          year_of_study: cached.year_of_study || 1,
+          annual_family_income: parseFloat(cached.income || cached.annual_family_income) || 0,
+          category: cached.category || 'General',
+          disability_status: cached.disability_status || false,
+          gender: cached.gender || 'Not Specified',
+          preferred_language: localStorage.getItem(STORAGE_KEYS.language) || 'en',
+          score: parseFloat(cached.score) || 0,
+        };
+        const synced = await tryFetch('/students/me', {
+          method: 'POST',
+          body: JSON.stringify(payload),
+        });
+        if (synced && synced.id) {
+          localStorage.setItem(STORAGE_KEYS.studentId, synced.id);
+          const fullProfile = { ...payload, ...cached, id: synced.id };
+          local.setProfile(fullProfile);
+          return fullProfile;
+        }
+      } catch (err) {
+        console.error("Failed to auto-sync student profile to backend", err);
+      }
+      return cached;
+    }
     throw new Error('No profile found');
   },
 
@@ -233,6 +267,14 @@ export const api = {
     });
     if (remote) return remote;
     return null; // Handled gracefully in MentorChat with local responses
+  },
+
+  async translateMessage(text, targetLang) {
+    const remote = await tryFetch('/chatbot/translate', {
+      method: 'POST',
+      body: JSON.stringify({ text, target_lang: targetLang })
+    });
+    return remote?.translated_text || text;
   },
 
   // ── Notifications ──────────────────────────────────────────────────────────
