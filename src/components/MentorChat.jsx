@@ -86,73 +86,68 @@ export default function MentorChat({ studentId, messages, onSendMessage }) {
   };
 
   return (
-    <div className="mentor-chat-view">
-      <div className="dashboard-header">
-        <h2>Mentor & Counselor Support</h2>
-        <p style={{ color: 'var(--text-secondary)', marginTop: '4px' }}>
-          Ask Sarah questions about document applications, government scholarship portals, or paste your essays for live feedback.
-        </p>
+    <div className="mentor-chat-view page-shell">
+      {/* Clean Header */}
+      <div className="dashboard-header-clean">
+        <div className="header-greeting">
+          <h2>Mentor Support</h2>
+          <p>Ask Sarah Jenkins questions about application documents or paste your statement drafts for review.</p>
+        </div>
       </div>
 
-      <div className="chat-container">
+      <div className="chat-container-clean">
         
         {/* Sidebar contacts list */}
-        <div className="chat-contacts">
-          <div className="chat-contacts-header">Your Mentors</div>
-          <div className="contact-item active">
-            <div className="contact-avatar">
+        <div className="chat-contacts-clean">
+          <div className="chat-contacts-header-clean">Advisors</div>
+          <div className="contact-item-clean active">
+            <div className="contact-avatar-clean">
               S
-              <div className="online-indicator"></div>
+              <div className="online-indicator-clean"></div>
             </div>
-            <div className="contact-info">
-              <div className="contact-name">Sarah Jenkins</div>
-              <div className="contact-role">First-Gen Advisor</div>
+            <div className="contact-info-clean">
+              <span className="contact-name-clean">Sarah Jenkins</span>
+              <span className="contact-role-clean">First-Gen Advisor</span>
             </div>
           </div>
         </div>
 
         {/* Main conversation pane */}
-        <div className="chat-main">
+        <div className="chat-main-clean">
           
-          <div className="chat-header">
-            <div className="contact-avatar" style={{ width: '40px', height: '40px', fontSize: '15px' }}>S</div>
-            <div>
-              <div className="profile-name">Sarah Jenkins</div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '11px', color: 'var(--success)' }}>
-                <div style={{ width: '6px', height: '6px', backgroundColor: 'var(--success)', borderRadius: '50%' }}></div>
-                Active Now • First-Gen Advisor
-              </div>
+          <div className="chat-header-clean">
+            <div className="contact-avatar-clean">S</div>
+            <div className="chat-header-meta-clean">
+              <strong>Sarah Jenkins</strong>
+              <span>Active Now &bull; Advisor</span>
             </div>
           </div>
 
-          <div className="chat-messages">
+          <div className="chat-messages-clean">
             {messages.map((msg, index) => (
               <div 
                 key={index} 
-                className={`message-bubble ${msg.sender}`}
+                className={`message-bubble-clean ${msg.sender}`}
               >
-                <div>{msg.text}</div>
-                <div className="message-time">
+                <div className="bubble-text">{msg.text}</div>
+                <div className="message-time-clean">
                   {new Date(msg.time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                 </div>
               </div>
             ))}
             {isTyping && (
-              <div className="message-bubble mentor" style={{ display: 'flex', alignItems: 'center', gap: '4px', padding: '10px 14px' }}>
-                <span style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>Sarah is typing</span>
-                <span className="dot" style={{ animation: 'bounce 1.4s infinite ease-in-out', animationDelay: '0s' }}>•</span>
-                <span className="dot" style={{ animation: 'bounce 1.4s infinite ease-in-out', animationDelay: '0.2s' }}>•</span>
-                <span className="dot" style={{ animation: 'bounce 1.4s infinite ease-in-out', animationDelay: '0.4s' }}>•</span>
+              <div className="message-bubble-clean mentor typing">
+                <span>Sarah is typing...</span>
               </div>
             )}
             <div ref={chatEndRef} />
           </div>
 
-          <div className="chat-suggestions">
+          <div className="chat-suggestions-clean">
             {suggestions.map((sug, idx) => (
               <button 
                 key={idx} 
-                className="chat-suggestion-chip"
+                className="chat-suggestion-chip-clean"
                 onClick={() => handleSend(sug)}
               >
                 {sug}
@@ -160,20 +155,20 @@ export default function MentorChat({ studentId, messages, onSendMessage }) {
             ))}
           </div>
 
-          <div className="chat-input-area">
+          <div className="chat-input-area-clean">
             <input
               type="text"
-              className="chat-input"
-              placeholder="Ask Sarah about Tehsildar certificates, NSP portal rules, or paste your essays..."
+              className="chat-input-clean"
+              placeholder="Ask Sarah a question or paste your drafts..."
               value={inputText}
               onChange={(e) => setInputText(e.target.value)}
               onKeyDown={handleKeyPress}
             />
             <button 
-              className="btn-send"
+              className="btn-send-clean"
               onClick={() => handleSend(inputText)}
             >
-              <Send size={18} />
+              <Send size={16} />
             </button>
           </div>
 

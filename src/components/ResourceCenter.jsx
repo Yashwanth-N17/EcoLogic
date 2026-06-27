@@ -56,39 +56,41 @@ Yours obediently,
   };
 
   return (
-    <div className="resource-center-view">
-      <div className="dashboard-header">
-        <h2>First-Gen Resource Center (India)</h2>
-        <p style={{ color: 'var(--text-secondary)', marginTop: '4px' }}>
-          Explore plain-language guides, official letter templates, and frequently asked questions about Indian scholarship portals.
-        </p>
+    <div className="resource-center-view page-shell">
+      {/* Clean Header */}
+      <div className="dashboard-header-clean">
+        <div className="header-greeting">
+          <h2>Resource Center</h2>
+          <p>Guides, letter templates, and answers to common queries for Indian scholarship portals.</p>
+        </div>
       </div>
 
-      <div className="resources-grid">
+      <div className="resources-grid-clean">
         
         {/* Dictionary Panel */}
-        <div className="jargon-dictionary">
-          <h3 style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px', borderBottom: '1.5px solid var(--border-color)', paddingBottom: '10px' }}>
-            <BookOpen size={20} color="var(--primary)" /> Plain-English Dictionary
-          </h3>
-          <p style={{ fontSize: '13px', color: 'var(--text-secondary)', marginBottom: '16px', lineHeight: '1.4' }}>
-            Govt portals use complex terms. Click a word below to read its explanation in simple language.
-          </p>
+        <div className="jargon-dictionary-clean">
+          <div className="dictionary-header-clean">
+            <h3>
+              <BookOpen size={18} /> Plain-English Dictionary
+            </h3>
+            <p>
+              Govt portals use complex terms. Click a word below to read its explanation.
+            </p>
+          </div>
 
-          <div className="glossary-terms-list">
+          <div className="glossary-terms-list-clean">
             {GLOSSARY.map((item, index) => {
               const isActive = activeTerm === item.term;
               return (
-                <div key={index} className="glossary-term-item">
+                <div key={index} className="glossary-term-item-clean">
                   <h4 
-                    className="glossary-term-name"
+                    className={`glossary-term-name-clean ${isActive ? 'active' : ''}`}
                     onClick={() => setActiveTerm(isActive ? null : item.term)}
-                    style={{ textDecoration: isActive ? 'underline' : 'none' }}
                   >
-                    {item.term} {isActive ? '▼' : '►'}
+                    {item.term} <span>{isActive ? '▼' : '►'}</span>
                   </h4>
                   {isActive && (
-                    <p className="glossary-term-definition" style={{ marginTop: '6px', padding: '12px', backgroundColor: 'var(--bg-app)', borderRadius: '8px', borderLeft: '4px solid var(--primary)', fontSize: '13.5px' }}>
+                    <p className="glossary-term-definition-clean">
                       {item.definition}
                     </p>
                   )}
@@ -99,122 +101,78 @@ Yours obediently,
         </div>
 
         {/* Guides & Templates Panel */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+        <div className="templates-column-clean">
           
           {/* LoR Template Guide */}
-          <div className="section-card" style={{ padding: '24px' }}>
-            <h3 style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
-              <FileText size={20} color="var(--secondary)" /> Recommendation Letter Request Template
-            </h3>
-            <p style={{ fontSize: '13px', color: 'var(--text-secondary)', marginBottom: '16px', lineHeight: '1.4' }}>
-              Use this email format when requesting a letter of recommendation from your school teacher or college professor.
+          <div className="clean-section">
+            <div className="clean-section-header">
+              <h3>
+                <FileText size={18} /> Recommendation Request Template
+              </h3>
+            </div>
+            <p className="section-desc-clean">
+              Copy and customize this email template to request a letter of recommendation.
             </p>
 
-            <div style={{ position: 'relative' }}>
-              <pre style={{ 
-                backgroundColor: 'var(--bg-app)', 
-                padding: '16px', 
-                borderRadius: '8px', 
-                fontSize: '11px', 
-                overflowX: 'auto',
-                whiteSpace: 'pre-wrap',
-                fontFamily: 'monospace',
-                lineHeight: '1.5',
-                maxHeight: '180px',
-                border: '1px solid var(--border-color)'
-              }}>
+            <div className="template-box-clean">
+              <pre className="template-pre-clean">
                 {emailTemplate}
               </pre>
               <button 
                 onClick={() => copyToClipboard(emailTemplate, 'lor')}
-                style={{ 
-                  position: 'absolute', 
-                  top: '12px', 
-                  right: '12px', 
-                  border: 'none', 
-                  background: 'white', 
-                  boxShadow: 'var(--shadow-sm)',
-                  borderRadius: '6px', 
-                  width: '32px', 
-                  height: '32px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  cursor: 'pointer'
-                }}
+                className="btn-copy-clean"
                 title="Copy Template"
               >
-                {copiedTemplate === 'lor' ? <Check size={16} color="var(--success)" /> : <Copy size={16} color="var(--text-secondary)" />}
+                {copiedTemplate === 'lor' ? <Check size={14} color="var(--success)" /> : <Copy size={14} />}
               </button>
             </div>
           </div>
 
           {/* Bonafide Request Template */}
-          <div className="section-card" style={{ padding: '24px' }}>
-            <h3 style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
-              <FileText size={20} color="var(--accent)" /> College Bonafide Request Letter
-            </h3>
-            <p style={{ fontSize: '13px', color: 'var(--text-secondary)', marginBottom: '16px', lineHeight: '1.4' }}>
-              Submit this letter to your college admin window to get your official Bonafide Certificate stamped.
+          <div className="clean-section">
+            <div className="clean-section-header">
+              <h3>
+                <FileText size={18} /> College Bonafide Letter
+              </h3>
+            </div>
+            <p className="section-desc-clean">
+              Submit this letter to your college administration department to request a Bonafide Certificate.
             </p>
 
-            <div style={{ position: 'relative' }}>
-              <pre style={{ 
-                backgroundColor: 'var(--bg-app)', 
-                padding: '16px', 
-                borderRadius: '8px', 
-                fontSize: '11px', 
-                overflowX: 'auto',
-                whiteSpace: 'pre-wrap',
-                fontFamily: 'monospace',
-                lineHeight: '1.5',
-                maxHeight: '180px',
-                border: '1px solid var(--border-color)'
-              }}>
+            <div className="template-box-clean">
+              <pre className="template-pre-clean">
                 {bonafideTemplate}
               </pre>
               <button 
                 onClick={() => copyToClipboard(bonafideTemplate, 'bonafide')}
-                style={{ 
-                  position: 'absolute', 
-                  top: '12px', 
-                  right: '12px', 
-                  border: 'none', 
-                  background: 'white', 
-                  boxShadow: 'var(--shadow-sm)',
-                  borderRadius: '6px', 
-                  width: '32px', 
-                  height: '32px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  cursor: 'pointer'
-                }}
+                className="btn-copy-clean"
                 title="Copy Template"
               >
-                {copiedTemplate === 'bonafide' ? <Check size={16} color="var(--success)" /> : <Copy size={16} color="var(--text-secondary)" />}
+                {copiedTemplate === 'bonafide' ? <Check size={14} color="var(--success)" /> : <Copy size={14} />}
               </button>
             </div>
           </div>
 
           {/* FAQs Accordion */}
-          <div className="section-card" style={{ padding: '24px' }}>
-            <h3 style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px' }}>
-              <HelpCircle size={20} color="var(--warning)" /> FAQs for Indian Scholars
-            </h3>
+          <div className="clean-section">
+            <div className="clean-section-header">
+              <h3>
+                <HelpCircle size={18} /> FAQs for Scholars
+              </h3>
+            </div>
             
-            <div className="faq-list">
+            <div className="faq-list-clean">
               {FAQ.map((faq, idx) => (
-                <div key={idx} className="faq-item">
+                <div key={idx} className="faq-item-clean">
                   <button 
-                    className="faq-question"
+                    className="faq-question-clean"
                     onClick={() => toggleFaq(idx)}
                   >
                     <span>{faq.q}</span>
-                    <span style={{ fontSize: '12px' }}>{openFaq === idx ? '▲' : '▼'}</span>
+                    <span className="arrow">{openFaq === idx ? '▲' : '▼'}</span>
                   </button>
                   {openFaq === idx && (
-                    <div className="faq-answer">
+                    <div className="faq-answer-clean">
                       {faq.a}
                     </div>
                   )}

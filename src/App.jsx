@@ -735,7 +735,7 @@ export default function App() {
           </div>
           <button 
             onClick={handleResetApp} 
-            style={{ border: 'none', background: 'none', cursor: 'pointer', color: 'var(--text-secondary)' }}
+            style={{ border: 'none', background: 'none', cursor: 'pointer', color: 'var(--text-secondary)', display: 'flex', alignItems: 'center' }}
             title="Log Out"
           >
             <LogOut size={16} />
