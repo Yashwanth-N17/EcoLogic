@@ -19,6 +19,23 @@ import crawler
 # Create database tables
 Base.metadata.create_all(bind=engine)
 
+# Helper to upsert scholarships into the DB
+def save_scholarships(data: list[dict], db: Session) -> int:
+    """Upsert scholarship dicts into the DB. Returns number of newly inserted rows."""
+    new_count = 0
+    for item in data:
+        existing = db.query(models.Scholarship).filter(models.Scholarship.id == item["id"]).first()
+        if existing:
+            for key in ["title", "provider", "description", "amount", "deadline",
+                        "eligibility_criteria", "required_documents", "application_link",
+                        "tags", "is_verified"]:
+                setattr(existing, key, item.get(key, getattr(existing, key)))
+        else:
+            db.add(models.Scholarship(**item))
+            new_count += 1
+    db.commit()
+    return new_count
+
 app = FastAPI(
     title="ScholarMate API",
     description="Backend API supporting EcoLogic ScholarMate dashboard for first-generation students in India",
@@ -44,7 +61,9 @@ app.mount("/uploads", StaticFiles(directory="./uploads"), name="uploads")
 def startup_event():
     db = next(get_db())
     try:
-        crawler.crawl_scholarships()
+        results = crawler.crawl_scholarships()
+        saved = save_scholarships(results, db)
+        print(f"[Startup] Saved {saved} new scholarships")
     except Exception as e:
         print(f"Startup crawler error: {e}")
     finally:
@@ -53,9 +72,9 @@ def startup_event():
 @app.post("/crawl")
 def trigger_crawl():
     try:
-        data = crawler.crawl_scholarships()
-        new_count = len(data) if isinstance(data, list) else 0
-        return {"status": "success", "new_scholarships": new_count}
+        results = crawler.crawl_scholarships()
+        new_saved = save_scholarships(results, next(get_db()))
+        return {"status": "success", "new_scholarships": new_saved}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Crawler error: {e}")
 
